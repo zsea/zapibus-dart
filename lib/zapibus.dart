@@ -71,7 +71,7 @@ String _GetSignature(Map<String, dynamic> reqData, String secret) {
   return signature;
 }
 
-abstract class IzApibusRequest {
+abstract class zApibusRequest {
   String method = "";
   Map<String, dynamic> ToParams();
 }
@@ -119,7 +119,8 @@ class zApibus {
     return zApibusResponse();
   }
 
-  Future<zApibusResponse> Request(IzApibusRequest request,
+  Future<zApibusResponse> Request<T extends zApibusRequest>(
+      zApibusRequest request,
       {zApibusAuthenticate? authenticate,
       String? session,
       String httpMethod = "POST"}) async {
