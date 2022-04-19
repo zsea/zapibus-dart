@@ -4,15 +4,6 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:dio/dio.dart';
 
-//import 'dart:convert';
-//import 'package:convert/convert.dart';
-//import 'package:crypto/crypto.dart';
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
-
 String _md5(String s) {
   var content = new Utf8Encoder().convert(s);
   var md5 = crypto.md5;
@@ -82,16 +73,39 @@ class zApibusAuthenticate {
   zApibusAuthenticate(this.token, this.secret);
 }
 
-class zApibusResponse {}
+class zApibusResponse<T> {
+  String id="";
+  int code=0;
+  String? sub_code="";
+  String message="";
+  String? sub_message="";
+  T? data;
+  //Map<String, dynamic>? _data;
+  zApibusResponse(this.id,this.code,this.message,this.sub_code,this.sub_message);
+  factory zApibusResponse.fromJson(Map<String, dynamic> json,T Function(Map<String, dynamic> d)? deserializer){
+    zApibusResponse<T> response=zApibusResponse(json['id'],json['code'],json['message'],json['sub_code'],json['sub_message']);
+    if(deserializer!=null){
+      response.data=deserializer(json["data"]);
+    }
+    return response;
+  }
+}
 
 class zApibus {
-  String appkey, secret, url;
-  zApibus(this.appkey, this.secret, this.url);
+  String appkey, secret, url,httpMethod="POST";
+  Map<String,String>? headers;
+  Dio _dio=Dio(BaseOptions(
+    connectTimeout: 5000,
+    receiveTimeout: 3000,
+  ));
+  zApibus(this.appkey, this.secret, this.url,{this.httpMethod="POST",this.headers});
 
-  Future<zApibusResponse> Execute(String method, Map<String, dynamic> params,
+  Future<zApibusResponse<T>> Execute<T>(String method, Map<String, dynamic> params,
       {zApibusAuthenticate? authenticate,
       String? session,
-      String httpMethod = "POST"}) async {
+      String? httpMethod,
+      T Function(Map<String, dynamic> d)? deserializer
+      }) async {
     //options.noSuchMethod(invocation)
     Map<String, dynamic> reqData = {
       'appkey': appkey,
@@ -104,27 +118,41 @@ class zApibus {
     String signature = _GetSignature(
         reqData, authenticate == null ? secret : authenticate.secret);
     reqData.addAll({"signature": signature});
-    //reqData.addAll({})
-    var dio = Dio();
-    //print(jsonEncode(reqData));
-    //dio.request(path)
     Response<dynamic> response;
-    if (httpMethod == "GET") {
-      response = await dio.get(url, queryParameters: reqData);
-    } else {
-      response = await dio.post(url, data: reqData);
+    String http_method=httpMethod??this.httpMethod;
+    try{
+      if (http_method == "GET") {
+        response = await _dio.get(url, queryParameters: reqData);
+      } else {
+        response = await _dio.post(url, data: reqData);
+      }
     }
-    print(response.data);
-    //print("请求完成");
-    return zApibusResponse();
+    catch(e){
+      //print(e);
+      return zApibusResponse("",10,"Service Currently Unavailable","isp.apibus-unknown-error","请求zApibus时发生未知错误");
+
+    }
+    if(response.statusCode!=200){
+      return zApibusResponse("",10,"Service Currently Unavailable","isp.apibus-net-error:httpcode:"+response.statusCode.toString(),"zApibus服务器错误");
+    }
+    JsonCodec JSON = const JsonCodec();
+    try{
+      zApibusResponse<T> zResponse=zApibusResponse.fromJson(JSON.decode(response.data),deserializer);
+      return zResponse;
+    }
+    catch(e){
+      return zApibusResponse("",10,"Service Currently Unavailable","isp.apibus-response-format-error","zApibus服务器响应数据格式错误");
+    }
   }
 
-  Future<zApibusResponse> Request<T extends zApibusRequest>(
+  Future<zApibusResponse<T>> Request<T>(
       zApibusRequest request,
       {zApibusAuthenticate? authenticate,
       String? session,
-      String httpMethod = "POST"}) async {
-    return this.Execute(request.method, request.ToParams(),
-        authenticate: authenticate, session: session, httpMethod: httpMethod);
+      String? httpMethod,
+      T Function(Map<String, dynamic> d)? deserializer
+      }) async {
+    return Execute<T>(request.method, request.ToParams(),
+        authenticate: authenticate, session: session, httpMethod: httpMethod,deserializer: deserializer);
   }
 }
