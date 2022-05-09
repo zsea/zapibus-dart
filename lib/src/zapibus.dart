@@ -63,7 +63,7 @@ String _GetSignature(Map<String, dynamic> reqData, String secret) {
 abstract class zApibusRequest {
   String method = "";
   zApibusRequest(this.method);
-  Map<String, dynamic> ToParams();
+  Map<String, dynamic> toParams();
 }
 
 class zApibusAuthenticate {
@@ -108,7 +108,7 @@ class zApibus {
     _dio.options.receiveTimeout = receiveTimeout;
   }
 
-  Future<zApibusResponse<T>> Execute<T>(
+  Future<zApibusResponse<T>> execute<T>(
       String method, Map<String, dynamic> params,
       {zApibusAuthenticate? authenticate,
       String? session,
@@ -184,7 +184,7 @@ class zApibus {
     }
   }
 
-  Future<zApibusResponse<T>> Request<T>(zApibusRequest request,
+  Future<zApibusResponse<T>> request<T>(zApibusRequest request,
       {zApibusAuthenticate? authenticate,
       String? session,
       String? httpMethod,
@@ -192,7 +192,7 @@ class zApibus {
       Map<String, dynamic>? headers,
       int? connectTimeout,
       int? receiveTimeout}) async {
-    return Execute<T>(request.method, request.ToParams(),
+    return execute<T>(request.method, request.toParams(),
         authenticate: authenticate,
         session: session,
         httpMethod: httpMethod,

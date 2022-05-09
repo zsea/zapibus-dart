@@ -36,7 +36,8 @@ class LoginRequest extends zApibusRequest {
   String username, password, domain;
   LoginRequest(this.username, this.password, this.domain)
       : super("zsea.admin.login");
-  Map<String, dynamic> ToParams() {
+  @override
+  Map<String, dynamic> toParams() {
     var timestamp = DateTime.now().microsecondsSinceEpoch ~/ 1000;
     return {
       "username": "admin",

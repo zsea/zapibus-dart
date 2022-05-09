@@ -22,13 +22,13 @@ zApibus bus=zApibus(String appkey, String secret, String url,
 ## 调用方法
 
 ```dart
-zApibusResponse<LoginResponse> response = await bus.Execute<LoginResponse>(
+zApibusResponse<LoginResponse> response = await bus.execute<LoginResponse>(
       "zsea.admin.login", login,
       deserializer: Deserializer);
 ```
 或者
 ```dart
-  zApibusResponse<LoginResponse> response = await bus.Request<LoginResponse>(
+  zApibusResponse<LoginResponse> response = await bus.request<LoginResponse>(
       LoginRequest("admin", "admin", "expert.zsea.app"),
       deserializer: Deserializer);
 ```
@@ -41,7 +41,7 @@ Request方法通过继承自```zApibusRequest```类的子类传递参数。
 * authenticate - 用户认证信息。
 * session - 用户的会话信息，与```authenticate```传入一个即可。
 * httpMethod - 调用HTTP接口时的方法，可选值：POST/GET。
-* deserializer - 调用成功时，将返回的```data```字段实例化为方法的泛型参数的回调方法。
+* deserializer - 调用成功时，将返回的```data```字段实例化为方法的泛型参数的回调方法。函数签名为：```T Function(Map<String, dynamic> d)```
 * headers - 自定义的http头，与实例化时传入的进行合并。
 * connectTimeout
 * receiveTimeout
