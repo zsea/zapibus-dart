@@ -1,5 +1,3 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'package:zapibus/src/zapibus.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'dart:convert';
@@ -42,9 +40,20 @@ class LoginRequest extends zApibusRequest {
     return {
       "username": "admin",
       "timestamp": timestamp,
-      "domain": "expert.zsea.app",
+      "domain": "",
       "password": _md5(_md5("admin#admin") + "#" + timestamp.toString())
     };
+  }
+}
+
+class MessageListResponse {
+  static MessageListResponse deserializer(dynamic json) {
+    MessageListResponse response = MessageListResponse();
+    //response.count=json["count"];
+    List<dynamic> _json = json;
+    print("打印数据");
+    print(_json.length);
+    return response;
   }
 }
 
@@ -63,19 +72,16 @@ void main() async {
     "domain": "expert.zsea.app",
     "password": _md5(_md5("admin#admin") + "#" + timestamp.toString())
   };
-  zApibus bus = new zApibus("1", "", "https://expert.zsea.dev/api",
+  zApibus bus = new zApibus("1", "hmJ1Y7tyi7cM", "http://127.0.0.1:8080/api",
       headers: {"x-token": "aaaa"});
   //bus.url="";
   // zApibusResponse<LoginResponse> response = await bus.Execute<LoginResponse>(
   //     "zsea.admin.login", login,
   //     deserializer: Deserializer);
-  zApibusResponse<LoginResponse> response = await bus.Request<LoginResponse>(
-      LoginRequest("admin", "admin", "expert.zsea.app"),
-      deserializer: Deserializer);
-  if (response.code == 0) {
-    print("登录成功 Token=" + response.data!.token!.token!);
-    //print(response.data!.token!.token);
-  } else {
-    print("登录失败：" + response.message);
-  }
+  zApibusResponse<MessageListResponse> response =
+      await bus.execute<MessageListResponse>(
+          "charge.user.messages.get", {"laster": 999999},
+          deserializer: MessageListResponse.deserializer,
+          session: "JSt7C6hmnGyM4iNArSn6JkktHBRMd96a");
+  print(response);
 }

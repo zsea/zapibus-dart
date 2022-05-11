@@ -79,18 +79,18 @@ class zApibusResponse<T> {
   String message = "";
   String? sub_message = "";
   T? data;
-  Map<String, dynamic>? origin;
+  dynamic origin;
   zApibusResponse(
       this.id, this.code, this.message, this.sub_code, this.sub_message);
-  factory zApibusResponse.fromJson(Map<String, dynamic> json,
-      T Function(Map<String, dynamic> d)? deserializer) {
+  factory zApibusResponse.fromJson(
+      Map<String, dynamic> json, T Function(dynamic d)? deserializer) {
+    //print(json["data"].runtimeType);
     zApibusResponse<T> response = zApibusResponse(json['id'], json['code'],
         json['message'], json['sub_code'], json['sub_message']);
     if (deserializer != null) {
       response.data = deserializer(json["data"]);
-    } else {
-      response.origin = json["data"];
     }
+    response.origin = json["data"];
     return response;
   }
 }
@@ -109,11 +109,11 @@ class zApibus {
   }
 
   Future<zApibusResponse<T>> execute<T>(
-      String method, Map<String, dynamic> params,
+      String method, Map<String, dynamic>? params,
       {zApibusAuthenticate? authenticate,
       String? session,
       String? httpMethod,
-      T Function(Map<String, dynamic> d)? deserializer,
+      T Function(dynamic d)? deserializer,
       Map<String, dynamic>? headers,
       int? connectTimeout,
       int? receiveTimeout}) async {
@@ -161,7 +161,6 @@ class zApibus {
         );
       }
     } catch (e) {
-      //print(e);
       return zApibusResponse("", 10, "Service Currently Unavailable",
           "isp.apibus-unknown-error", "请求zApibus时发生未知错误");
     }
@@ -173,12 +172,14 @@ class zApibus {
           "isp.apibus-net-error:httpcode:" + response.statusCode.toString(),
           "zApibus服务器错误");
     }
+    //print(response.data.runtimeType);
     JsonCodec JSON = const JsonCodec();
     try {
       zApibusResponse<T> zResponse =
           zApibusResponse.fromJson(JSON.decode(response.data), deserializer);
       return zResponse;
-    } catch (e) {
+    } catch (e, stack) {
+      //print(stack);
       return zApibusResponse("", 10, "Service Currently Unavailable",
           "isp.apibus-response-format-error", "zApibus服务器响应数据格式错误");
     }
@@ -188,7 +189,7 @@ class zApibus {
       {zApibusAuthenticate? authenticate,
       String? session,
       String? httpMethod,
-      T Function(Map<String, dynamic> d)? deserializer,
+      T Function(dynamic d)? deserializer,
       Map<String, dynamic>? headers,
       int? connectTimeout,
       int? receiveTimeout}) async {
