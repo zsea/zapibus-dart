@@ -18,9 +18,24 @@ zApibus bus=zApibus(String appkey, String secret, String url,
 * headers - 请求时添加的自定义http header
 * connectTimeout - 连接服务器超时时间，单位是毫秒。
 * receiveTimeout - 接收数据的最长时限，单位是毫秒。
-* onResponse - 响应拦截函数，函数签名为：```Future Function(zApibusResponse response)?```
+* onResponse - 响应拦截函数，函数签名为：```Future Function(zApibusRequestResponse response)```
+* onHeaders - 添加Header时触发，可完成动态添加Header，函数签名为：```Future<Map<String, String>> Function(Map<String, dynamic> reqData)```
 
 > 增加```onResponse```的目的是为了拦截请求结果，判断用户是否是未登录，未登录时可统一跳转到登录页面。
+
+### zApibusRequestResponse
+
+在响应拦截中传入此类型数据。
+
+* Map<String, dynamic> request - 请求的原始数据
+* zApibusResponse<T> response - 解析后的响应数据
+* String httpMethod - 请求的http method。目前仅支持GET/POST
+* Map<String, dynamic> reqHeader - 自定义的请求头
+* String url - 请求的URL
+* int httpStatusCode - 响应的HTTP状态码
+* String? httpResponseBody - 响应的原始数据
+* Object? error - 错误信息
+* StackTrace? stack - 错误的调用堆栈
 
 ## 调用方法
 
