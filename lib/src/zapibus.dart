@@ -98,6 +98,7 @@ class zApibusResponse<T> {
 class zApibus {
   String appkey, secret, url, httpMethod = "POST";
   Map<String, String>? headers;
+  Future Function(zApibusResponse response)? onResponse;
   final Dio _dio = Dio();
   zApibus(this.appkey, this.secret, this.url,
       {this.httpMethod = "POST",
@@ -107,8 +108,30 @@ class zApibus {
     _dio.options.connectTimeout = connectTimeout;
     _dio.options.receiveTimeout = receiveTimeout;
   }
-
   Future<zApibusResponse<T>> execute<T>(
+      String method, Map<String, dynamic>? params,
+      {zApibusAuthenticate? authenticate,
+      String? session,
+      String? httpMethod,
+      T Function(dynamic d)? deserializer,
+      Map<String, dynamic>? headers,
+      int? connectTimeout,
+      int? receiveTimeout}) async {
+    zApibusResponse<T> response = await _execute<T>(method, params,
+        authenticate: authenticate,
+        session: session,
+        httpMethod: httpMethod,
+        deserializer: deserializer,
+        headers: headers,
+        connectTimeout: connectTimeout,
+        receiveTimeout: receiveTimeout);
+    if (onResponse != null) {
+      await onResponse!(response);
+    }
+    return response;
+  }
+
+  Future<zApibusResponse<T>> _execute<T>(
       String method, Map<String, dynamic>? params,
       {zApibusAuthenticate? authenticate,
       String? session,

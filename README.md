@@ -18,6 +18,9 @@ zApibus bus=zApibus(String appkey, String secret, String url,
 * headers - 请求时添加的自定义http header
 * connectTimeout - 连接服务器超时时间，单位是毫秒。
 * receiveTimeout - 接收数据的最长时限，单位是毫秒。
+* onResponse - 响应拦截函数，函数签名为：```Future Function(zApibusResponse response)?```
+
+> 增加```onResponse```的目的是为了拦截请求结果，判断用户是否是未登录，未登录时可统一跳转到登录页面。
 
 ## 调用方法
 
@@ -45,6 +48,7 @@ request方法通过继承自```zApibusRequest```类的子类传递参数。
 * headers - 自定义的http头，与实例化时传入的进行合并。
 * connectTimeout - 连接走超时时间
 * receiveTimeout - 接收数据超时时间
+
 
 ### 返回值
 

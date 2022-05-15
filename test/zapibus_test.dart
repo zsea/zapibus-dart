@@ -74,6 +74,9 @@ void main() async {
   };
   zApibus bus = new zApibus("1", "hmJ1Y7tyi7cM", "http://127.0.0.1:8080/api",
       headers: {"x-token": "aaaa"});
+  bus.onResponse = (response) async {
+    print(response.code);
+  };
   //bus.url="";
   // zApibusResponse<LoginResponse> response = await bus.Execute<LoginResponse>(
   //     "zsea.admin.login", login,
